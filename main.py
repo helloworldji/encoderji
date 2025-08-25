@@ -6,9 +6,8 @@ import base64
 import tempfile
 import random
 import hashlib
-import lzma
 import binascii
-from cryptography.fernet import Fernet
+import struct
 from flask import Flask
 import telebot
 from threading import Thread
@@ -41,16 +40,19 @@ def polymorphic_xor(data, key):
         for i in range(len(result)):
             result[i] ^= key[(i + round_num) % key_len]
             result[i] = (result[i] + round_num) % 256
+            # Add more confusion with bit rotations
+            result[i] = ((result[i] << 2) | (result[i] >> 6)) & 0xFF
     
     return bytes(result)
 
 def multi_layer_compress(data):
-    """Multiple compression layers with different algorithms"""
+    """Multiple compression layers"""
     # First compression
     compressed = zlib.compress(data, level=9)
     
-    # Second compression
-    compressed = lzma.compress(compressed)
+    # Second compression with custom header
+    header = b'CZ' + struct.pack('>I', len(compressed))
+    compressed = header + compressed
     
     # Third compression
     compressed = zlib.compress(compressed, level=9)
@@ -68,7 +70,7 @@ def multi_layer_encode(data):
     # Third encoding
     encoded = binascii.hexlify(encoded)
     
-    # Fourth encoding
+    # Fourth encoding with custom format
     encoded = base64.b64encode(encoded)
     
     return encoded
@@ -105,10 +107,9 @@ def ultra_encode(source: str, layers: int = 7) -> str:
         
         # Create the decoder stub with anti-tampering
         decoder_stub = f'''# ULTRA SECURE ENCODED PYTHON - DO NOT MODIFY
-import marshal, zlib, lzma, base64, binascii, hashlib, time
+import marshal, zlib, base64, binascii, hashlib, time, struct, random
 
 def generate_dynamic_key(seed, length):
-    import random
     random.seed(seed)
     return bytes([random.randint(0, 255) for _ in range(length)])
 
@@ -120,12 +121,16 @@ def polymorphic_xor(data, key):
         for i in range(len(result)):
             result[i] ^= key[(i + round_num) % key_len]
             result[i] = (result[i] + round_num) % 256
+            # Reverse bit rotations
+            result[i] = ((result[i] >> 2) | (result[i] << 6)) & 0xFF
     
     return bytes(result)
 
 def multi_layer_decompress(data):
     data = zlib.decompress(data)
-    data = lzma.decompress(data)
+    # Remove custom header
+    if data[:2] == b'CZ':
+        data = data[6:]  # Skip 'CZ' + 4-byte length
     data = zlib.decompress(data)
     return data
 
@@ -184,10 +189,11 @@ Welcome to the most secure Python code encoder available!
 **Features:**
 • 7-layer polymorphic encryption
 • Dynamic key generation
-• Multiple compression algorithms (zlib, lzma)
+• Multiple compression algorithms
 • Multiple encoding schemes (Base64, Base85, Hex)
 • Anti-debugging and anti-tampering protection
 • Junk data injection to confuse analysis
+• Bit rotation obfuscation
 
 Send me any Python code or .py file to get started!"""
     
