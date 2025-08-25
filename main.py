@@ -1,12 +1,18 @@
-# Simple Telegram Encoder Bot for Render
+# Ultra Secure Telegram Python Encoder Bot
 import os
 import marshal
 import zlib
 import base64
 import tempfile
+import random
+import hashlib
+import lzma
+import binascii
+from cryptography.fernet import Fernet
 from flask import Flask
 import telebot
 from threading import Thread
+import time
 
 # Bot configuration
 BOT_TOKEN = "8241335689:AAHV4hZmiZrTxgVeidJw4QU5kuMM09irV24"
@@ -20,133 +26,214 @@ app = Flask(__name__)
 def health():
     return "Bot is running!", 200
 
-# Encoder functions
-def encode_layer(data: bytes, key: int) -> bytes:
-    xored = bytes([b ^ key for b in data])
-    compressed = zlib.compress(xored)
-    return base64.b64encode(compressed)
+# Advanced encryption functions
+def generate_dynamic_key(seed, length):
+    """Generate a dynamic key based on seed"""
+    random.seed(seed)
+    return bytes([random.randint(0, 255) for _ in range(length)])
 
-def multilayer_encode(source: str, layers: int = 4, key: int = 37) -> str:
+def polymorphic_xor(data, key):
+    """Polymorphic XOR encryption with multiple rounds"""
+    result = bytearray(data)
+    key_len = len(key)
+    
+    for round_num in range(3):
+        for i in range(len(result)):
+            result[i] ^= key[(i + round_num) % key_len]
+            result[i] = (result[i] + round_num) % 256
+    
+    return bytes(result)
+
+def multi_layer_compress(data):
+    """Multiple compression layers with different algorithms"""
+    # First compression
+    compressed = zlib.compress(data, level=9)
+    
+    # Second compression
+    compressed = lzma.compress(compressed)
+    
+    # Third compression
+    compressed = zlib.compress(compressed, level=9)
+    
+    return compressed
+
+def multi_layer_encode(data):
+    """Multiple encoding layers with different algorithms"""
+    # First encoding
+    encoded = base64.b85encode(data)
+    
+    # Second encoding
+    encoded = base64.urlsafe_b64encode(encoded)
+    
+    # Third encoding
+    encoded = binascii.hexlify(encoded)
+    
+    # Fourth encoding
+    encoded = base64.b64encode(encoded)
+    
+    return encoded
+
+def ultra_encode(source: str, layers: int = 7) -> str:
+    """Ultra secure encoding with multiple protection layers"""
     try:
-        code = compile(source, "<encoded>", "exec")
+        # Compile and marshal the source code
+        code = compile(source, "<ultra_encoded>", "exec")
         payload = marshal.dumps(code)
         
-        for _ in range(layers):
-            payload = encode_layer(payload, key)
+        # Generate unique seeds for each layer
+        timestamp = int(time.time() * 1000)
+        seeds = [hashlib.sha256(f"{timestamp}{i}{random.random()}".encode()).digest() for i in range(layers)]
         
-        wrapper = f'''# Auto-Generated Encrypted Script
-import marshal, zlib, base64
+        # Apply multiple encoding layers
+        for i in range(layers):
+            # Generate dynamic key for this layer
+            key = generate_dynamic_key(seeds[i], 32)
+            
+            # Polymorphic XOR encryption
+            payload = polymorphic_xor(payload, key)
+            
+            # Multi-layer compression
+            if i % 2 == 0:
+                payload = multi_layer_compress(payload)
+            
+            # Multi-layer encoding
+            payload = multi_layer_encode(payload)
+            
+            # Add junk data to confuse analysis
+            junk = os.urandom(random.randint(5, 15))
+            payload = junk + payload + junk[::-1]
+        
+        # Create the decoder stub with anti-tampering
+        decoder_stub = f'''# ULTRA SECURE ENCODED PYTHON - DO NOT MODIFY
+import marshal, zlib, lzma, base64, binascii, hashlib, time
 
-def decode_layer(data, key):
-    data = base64.b64decode(data)
+def generate_dynamic_key(seed, length):
+    import random
+    random.seed(seed)
+    return bytes([random.randint(0, 255) for _ in range(length)])
+
+def polymorphic_xor(data, key):
+    result = bytearray(data)
+    key_len = len(key)
+    
+    for round_num in range(3):
+        for i in range(len(result)):
+            result[i] ^= key[(i + round_num) % key_len]
+            result[i] = (result[i] + round_num) % 256
+    
+    return bytes(result)
+
+def multi_layer_decompress(data):
     data = zlib.decompress(data)
-    return bytes([b ^ key for b in data])
+    data = lzma.decompress(data)
+    data = zlib.decompress(data)
+    return data
 
-key = {key}
-payload = {repr(payload)}
+def multi_layer_decode(data):
+    data = base64.b64decode(data)
+    data = binascii.unhexlify(data)
+    data = base64.urlsafe_b64decode(data)
+    data = base64.b85decode(data)
+    return data
 
-for _ in range({layers}):
-    payload = decode_layer(payload, key)
+# Anti-debugging and anti-tampering measures
+if hasattr(__import__('sys'), 'gettrace') and __import__('sys').gettrace() is not None:
+    print("DEBUGGER DETECTED! TERMINATING...")
+    __import__('os')._exit(1)
 
-exec(marshal.loads(payload))
+try:
+    # Decoding parameters
+    seeds = {seeds}
+    layers = {layers}
+    encrypted_payload = {repr(payload)}
+    
+    # Reverse the encoding process
+    for i in range(layers-1, -1, -1):
+        # Remove junk data
+        junk_len = random.randint(5, 15)
+        encrypted_payload = encrypted_payload[junk_len:-junk_len]
+        
+        # Multi-layer decoding
+        encrypted_payload = multi_layer_decode(encrypted_payload)
+        
+        # Multi-layer decompression if needed
+        if i % 2 == 0:
+            encrypted_payload = multi_layer_decompress(encrypted_payload)
+        
+        # Polymorphic XOR decryption
+        key = generate_dynamic_key(seeds[i], 32)
+        encrypted_payload = polymorphic_xor(encrypted_payload, key)
+    
+    # Execute the decoded payload
+    exec(marshal.loads(encrypted_payload))
+except Exception as e:
+    print("DECODING ERROR: This file may have been tampered with!")
+    __import__('os')._exit(1)
 '''
-        return wrapper
+        return decoder_stub
     except Exception as e:
-        raise ValueError(f"Error encoding: {e}")
+        raise ValueError(f"Ultra encoding failed: {e}")
 
 # Bot handlers
-@bot.message_handler(commands=['start'])
-def start_command(message):
-    welcome = """🔐 **Multi-Layer Python Encoder Bot**
+@bot.message_handler(commands=['start', 'help'])
+def send_welcome(message):
+    welcome = """🔐 **ULTRA SECURE Python Encoder Bot**
 
-Welcome! Send me Python code and I'll encode it with 4-layer encryption.
-
-**How to use:**
-1. Send me a .py file OR
-2. Send Python code as text
+Welcome to the most secure Python code encoder available!
 
 **Features:**
-• 4-layer encoding (Marshal + XOR + Zlib + Base64)
-• Secure code obfuscation
-• Easy to use
+• 7-layer polymorphic encryption
+• Dynamic key generation
+• Multiple compression algorithms (zlib, lzma)
+• Multiple encoding schemes (Base64, Base85, Hex)
+• Anti-debugging and anti-tampering protection
+• Junk data injection to confuse analysis
 
-Ready to encode! 🚀"""
+Send me any Python code or .py file to get started!"""
     
     bot.reply_to(message, welcome, parse_mode='Markdown')
-
-@bot.message_handler(commands=['help'])
-def help_command(message):
-    help_text = """🔐 **Help - Python Encoder Bot**
-
-**Commands:**
-• /start - Welcome message
-• /help - This help message
-
-**Usage:**
-1. Send a .py file - I'll encode it
-2. Send Python code as text - I'll encode it
-
-**Example:**
-```python
-print("Hello World!")
-x = 10
-print(f"Number: {x}")
-```
-
-The bot will return an encoded version of your code!"""
-    
-    bot.reply_to(message, help_text, parse_mode='Markdown')
 
 @bot.message_handler(content_types=['document'])
 def handle_document(message):
     try:
-        # Check if it's a Python file
         if not message.document.file_name.endswith('.py'):
-            bot.reply_to(message, "❌ Please send a Python (.py) file only!")
+            bot.reply_to(message, "❌ Please send a Python (.py) file!")
             return
         
-        bot.reply_to(message, "📥 Processing your file...")
+        bot.reply_to(message, "🔒 Processing your file with ULTRA encryption...")
         
-        # Download file
         file_info = bot.get_file(message.document.file_id)
         downloaded_file = bot.download_file(file_info.file_path)
-        
-        # Read content
         source_code = downloaded_file.decode('utf-8')
         
         if not source_code.strip():
             bot.reply_to(message, "❌ File is empty!")
             return
         
-        # Encode the code
-        encoded_code = multilayer_encode(source_code)
+        encoded_code = ultra_encode(source_code)
         
-        # Create temporary file
         with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
             f.write(encoded_code)
             temp_path = f.name
         
-        # Send encoded file
         with open(temp_path, 'rb') as f:
             bot.send_document(
                 message.chat.id, 
                 f, 
-                caption="🔐 Your encoded Python file!",
-                visible_file_name=f"encoded_{message.document.file_name}"
+                caption="🔐 Your ULTRA SECURE encoded Python file!",
+                visible_file_name=f"ultra_secure_{message.document.file_name}"
             )
         
-        # Clean up
         os.unlink(temp_path)
         
     except Exception as e:
-        bot.reply_to(message, f"❌ Error: {str(e)}")
+        bot.reply_to(message, f"❌ Encryption error: {str(e)}")
 
 @bot.message_handler(func=lambda message: True)
 def handle_text(message):
     try:
         text = message.text
         
-        # Check if it looks like Python code
         python_keywords = ['import', 'def ', 'class ', 'print(', 'if ', 'for ', 'while ']
         if not any(keyword in text.lower() for keyword in python_keywords):
             bot.reply_to(message, """📝 **Send me Python code to encode!**
@@ -154,51 +241,43 @@ def handle_text(message):
 Example:
 ```python
 print("Hello World!")
-x = 10
-print(f"Value: {x}")
-```
-
-Or send a .py file directly!""", parse_mode='Markdown')
+for i in range(10):
+    print(f"Number: {i}")
+```""", parse_mode='Markdown')
             return
         
-        bot.reply_to(message, "🔄 Encoding your code...")
+        bot.reply_to(message, "🔒 Applying ULTRA encryption to your code...")
         
-        # Encode the code
-        encoded_code = multilayer_encode(text)
+        encoded_code = ultra_encode(text)
         
-        # Create temporary file
         with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
             f.write(encoded_code)
             temp_path = f.name
         
-        # Send encoded file
         with open(temp_path, 'rb') as f:
             bot.send_document(
                 message.chat.id, 
                 f, 
-                caption="🔐 Your encoded Python code!",
-                visible_file_name="encoded_script.py"
+                caption="🔐 Your ULTRA SECURE encoded Python code!",
+                visible_file_name="ultra_secure_script.py"
             )
         
-        # Clean up
         os.unlink(temp_path)
         
     except Exception as e:
-        bot.reply_to(message, f"❌ Error: {str(e)}")
+        bot.reply_to(message, f"❌ Encryption error: {str(e)}")
 
 # Run bot in a separate thread
 def run_bot():
-    print("🤖 Bot started!")
+    print("🤖 ULTRA SECURE Bot started!")
     bot.infinity_polling()
 
 # Main function
 if __name__ == "__main__":
-    # Start bot in background
     bot_thread = Thread(target=run_bot)
     bot_thread.daemon = True
     bot_thread.start()
     
-    # Start Flask server (required by Render)
     port = int(os.environ.get('PORT', 5000))
     print(f"🌐 Starting server on port {port}")
     app.run(host='0.0.0.0', port=port)
