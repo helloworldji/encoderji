@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+ # -*- coding: utf-8 -*-
 # Ultra Secure Telegram Python Encoder Bot - Advanced Obfuscation Suite (v4.1)
 # Focus: Robustness, deployability, advanced obfuscation layers, minimal overhead for Telegram bot.
 # --- DO NOT ALTER CORE OBFUSCATION LOGIC UNLESS YOU UNDERSTAND THE FULL IMPLICATIONS ---
