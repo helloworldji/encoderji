@@ -1,5 +1,5 @@
-# Ultra Secure Telegram Python Encoder Bot - Ultra Simplified for Hosting
-# No emojis in strings, minimal decorative output.
+# Ultra Secure Telegram Python Encoder Bot - v4.1.1 (String Literal Fix)
+# No emojis in strings, minimal decorative output. Focus on fixing string literal error.
 
 import os
 import marshal
@@ -19,13 +19,11 @@ from flask import Flask
 import telebot
 
 # --- Configuration ---
-# Read sensitive configuration from environment variables.
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 if not BOT_TOKEN:
     print("FATAL ERROR: BOT_TOKEN environment variable not set.")
-    sys.exit(1) # Exit if no token is found.
+    sys.exit(1)
 
-# Flask app for health check endpoint.
 app = Flask(__name__)
 
 @app.route('/')
@@ -36,7 +34,6 @@ def health_check():
 # --- Core Obfuscation Engine ---
 
 class ObfuscationEngine:
-    """Handles code obfuscation, simplified for reliable hosting."""
     def __init__(self, layers=7, key_size=32):
         self.layers = layers
         self.key_size = key_size
@@ -51,7 +48,6 @@ class ObfuscationEngine:
         return hashlib.sha256(seed_material.encode()).digest()
 
     def _derive_keys(self, seed):
-        """Derives multiple keys from a seed."""
         keys = []
         prk = hashlib.sha256(seed).digest() 
         for i in range(self.layers):
@@ -62,7 +58,6 @@ class ObfuscationEngine:
         return keys
 
     def _poly_cipher(self, data, keys):
-        """Simplified polymorphic cipher with basic operations and rotations."""
         processed_data = bytearray(data)
         for layer_idx, key in enumerate(keys):
             key_len = len(key)
@@ -86,7 +81,6 @@ class ObfuscationEngine:
         return bytes(processed_data)
 
     def _multi_compress_obfuscated(self, data, level=9):
-        """Simplified multi-stage compression."""
         if len(data) < 64: return data
         try:
             compressed_l1 = zlib.compress(data, level=level)
@@ -102,19 +96,17 @@ class ObfuscationEngine:
         except zlib.error: return data
 
     def _encode_stages(self, data):
-        """Applies simplified encoding stages."""
         encoded_b85 = base64.b85encode(data)
         encoded_urlsafe = base64.urlsafe_b64encode(encoded_b85)
         encoded_hex = b'XX' + binascii.hexlify(encoded_urlsafe) + b'YY'
         
         scrambled_hex_bytearray = bytearray(encoded_hex)
         for i in range(len(scrambled_hex_bytearray)):
-            scrambled_hex_bytearray[i] ^= (i % 128) # Simplified scrambling
+            scrambled_hex_bytearray[i] ^= (i % 128)
         encoded_final = base64.b64encode(bytes(scrambled_hex_bytearray))
         return encoded_final
 
     def _decrypt_strings_for_stub(self, critical_strings_map, initial_key, seed_salt):
-        """Encrypts critical strings for embedding in the stub."""
         encrypted_strings_dict = {}
         for name, value in critical_strings_map.items():
             val_bytes = value.encode('utf-8') if isinstance(value, str) else value
@@ -126,12 +118,19 @@ class ObfuscationEngine:
         return encrypted_strings_dict
 
     def _generate_vm_stub_code(self, vm_args, encrypted_strings_map):
-        """Generates the VM stub code, minimizing complexity."""
-        embedded_encrypted_strings = "{\n"
-        for name, enc_val in encrypted_strings_map.items():
-            embedded_encrypted_strings += f"        '{name}': {repr(enc_val)},\n"
-        embedded_encrypted_strings += "    }"
+        # Use triple quotes and ensure f-string interpolation handles dict representation carefully.
+        # The use of `repr(enc_val)` is generally safe, but complex data can sometimes be tricky.
+        # For this structure, passing `encrypted_strings_map` directly and having the stub
+        # create the dictionary `self.s` with decrypted strings is the most robust.
         
+        # Prepare the string literal that represents the dictionary for the VM's __init__
+        # Use triple quotes to easily embed multiline strings.
+        encrypted_strings_literal = f'''{{{",\n".join([f"'{repr(name)}': {repr(enc_val)}," for name, enc_val in encrypted_strings_map.items()])}}}'''
+        
+        # Make sure the placeholder for encrypted_strings_map in the VM is handled correctly.
+        # It should be passed as a Python dictionary, not a string literal of a dict that gets re-parsed.
+        # The correct approach is to embed the dict literal directly.
+
         stub_template = f"""
 import marshal, zlib, base64, binascii, hashlib, time, struct, random, sys, os
 
@@ -157,6 +156,8 @@ class VM_Executor:
         self.layers = num_layers
         self.seed_salt = bytes.fromhex(seed_salt_hex)
         self.initial_key = bytes.fromhex(initial_key_hex)
+        
+        # The encrypted_strings_map is provided directly to the constructor.
         self.s = decrypt_strings(encrypted_strings_map, initial_key_hex, seed_salt_hex)
         self._validate_environment()
         self.keys = self._derive_keys_for_decipher(self.seed_salt)
@@ -241,7 +242,7 @@ class VM_Executor:
         try:
             decoded_final_b64 = self.s['base64_b64decode'](current_data)
             scrambled_hex_bytearray = bytearray(decoded_final_b64)
-            for i in range(len(scrambled_hex_bytearray)): scrambled_hex_bytearray[i] ^= (i % 128) # Inverse scramble
+            for i in range(len(scrambled_hex_bytearray)): scrambled_hex_bytearray[i] ^= (i % 128)
             current_data = bytes(scrambled_hex_bytearray)
 
             if not current_data.startswith(self.s['header_l1_prefix']) or not current_data.endswith(self.s['header_l2_prefix']): raise ValueError("Invalid hex prefix/suffix.")
@@ -290,7 +291,7 @@ For more info on features, send /help."""
                     self.bot.reply_to(message, "❌ Please send a Python (.py) file only!")
                     return
 
-                self.bot.reply_to(message, "🔒 Processing your file with advanced obfuscation...")
+                self.bot.reply_to(message, "🔒 Processing your file...")
                 
                 downloaded_file = self.bot.download_file(file_info.file_path)
                 source_code = downloaded_file.decode('utf-8', errors='ignore')
@@ -370,7 +371,7 @@ print("Hello")
             transformed_data = payload
             for i in range(self.obfuscator.layers):
                 transformed_data = self.obfuscator._poly_cipher(transformed_data, [keys[i]])
-                if i % 3 == 0: 
+                if i % 3 == 0: # Apply compression for specific layers.
                     transformed_data = self.obfuscator._multi_compress_obfuscated(transformed_data)
             
             final_encoded_payload = self.obfuscator._encode_stages(transformed_data)
