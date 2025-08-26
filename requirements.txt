@@ -1,2 +1,9 @@
+
+---
+
+**File: `requirements.txt`**
+
+```txt
+# requirements.txt
 pyTelegramBotAPI
 Flask
