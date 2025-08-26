@@ -1,7 +1,5 @@
- # -*- coding: utf-8 -*-
-# Ultra Secure Telegram Python Encoder Bot - Advanced Obfuscation Suite (v4.1)
-# Focus: Robustness, deployability, advanced obfuscation layers, minimal overhead for Telegram bot.
-# --- DO NOT ALTER CORE OBFUSCATION LOGIC UNLESS YOU UNDERSTAND THE FULL IMPLICATIONS ---
+# Ultra Secure Telegram Python Encoder Bot - Ultra Simplified for Hosting
+# No emojis in strings, minimal decorative output.
 
 import os
 import marshal
@@ -18,217 +16,135 @@ import glob
 import shutil
 from threading import Thread
 from flask import Flask
-import telebot # Ensure telebot is installed: pip install pyTelegramBotAPI
+import telebot
 
 # --- Configuration ---
-# Read sensitive configuration (like Bot Token) from environment variables for security.
-# Render injects the PORT variable automatically, and we read BOT_TOKEN from there too.
+# Read sensitive configuration from environment variables.
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 if not BOT_TOKEN:
     print("FATAL ERROR: BOT_TOKEN environment variable not set.")
-    print("Please set it in your Render service environment variables.")
-    # For local testing ONLY, uncomment and paste your token here:
-    # BOT_TOKEN = "YOUR_ACTUAL_BOT_TOKEN_HERE" 
-    if not BOT_TOKEN: sys.exit(1) # Exit if no token is found, even for local testing.
+    sys.exit(1) # Exit if no token is found.
 
-# Flask app for health check endpoint, required by many hosting platforms like Render.
+# Flask app for health check endpoint.
 app = Flask(__name__)
 
 @app.route('/')
 @app.route('/health')
 def health_check():
-    """Provides a basic health check endpoint."""
     return "Bot is operational.", 200
 
 # --- Core Obfuscation Engine ---
 
 class ObfuscationEngine:
-    """
-    Handles the complex process of transforming Python code into an obfuscated form.
-    It applies multiple layers of encryption, compression, encoding, and runtime complexity
-    to make the final payload extremely difficult to analyze statically.
-    """
+    """Handles code obfuscation, simplified for reliable hosting."""
     def __init__(self, layers=7, key_size=32):
         self.layers = layers
         self.key_size = key_size
-        # Generate a unique salt for seed generation. This salt is critical for deterministic key derivation.
         self.seed_salt = os.urandom(16) 
-        # Create a temporary directory for intermediate and final encoded files.
         self.temp_dir = tempfile.mkdtemp(prefix="obfuscator_")
-        print(f"Obfuscation temporary directory created: {self.temp_dir}")
+        print(f"Obfuscation temp dir: {self.temp_dir}")
 
     def _generate_complex_seed(self, base_seed):
-        """Generates a more complex, unique seed by combining multiple entropy sources."""
         timestamp = int(time.time() * 1000)
         random_val = random.random()
-        
-        # Combine base seed, timestamp, random value, process ID, and salt for unique seeding.
         seed_material = f"{base_seed.hex()}-{timestamp}-{random_val}-{os.getpid()}-{self.seed_salt.hex()}"
         return hashlib.sha256(seed_material.encode()).digest()
 
     def _derive_keys(self, seed):
-        """Derives multiple cryptographic keys from a single seed using an HKDF-like approach. This ensures each cipher layer has unique, yet derivable, keys."""
+        """Derives multiple keys from a seed."""
         keys = []
-        # Start with a Pseudo-Random Key (PRK) derived from the initial seed.
         prk = hashlib.sha256(seed).digest() 
-        
         for i in range(self.layers):
-            # Combine salt, counter (i), and PRK to derive the next key.
             t = self.seed_salt + struct.pack('>I', i) + prk
-            h = hashlib.sha256(t).digest() # Hash the combined material.
-            keys.append(h[:self.key_size]) # Use the first key_size bytes for this layer's key.
-            prk = h # The previous hash becomes the PRK for the next derivation step.
+            h = hashlib.sha256(t).digest()
+            keys.append(h[:self.key_size])
+            prk = h
         return keys
 
     def _poly_cipher(self, data, keys):
-        """
-        Applies an advanced polymorphic cipher with stateful operations, bit manipulation,
-        and deterministic control flow diversification per layer.
-        Each layer uses its own key and a seed-derived sequence of operations and rotations.
-        """
+        """Simplified polymorphic cipher with basic operations and rotations."""
         processed_data = bytearray(data)
-        
         for layer_idx, key in enumerate(keys):
             key_len = len(key)
-            # Seed for operation sequence and rotation amounts, derived from the layer's key.
             op_sequence_seed = hashlib.sha256(key).digest()
-            # Seed the random generator. This is critical for deterministic operation/rotation selection.
-            random.seed(op_sequence_seed) 
+            random.seed(op_sequence_seed)
 
-            # Define potential operations. The order will be shuffled deterministically based on the seed.
             op_funcs = [
-                lambda d, k, i, l, op_seed: (d[i] ^ k[(i + l) % k_len]) % 256, # XOR
-                lambda d, k, i, l, op_seed: (d[i] + k[(i + l) % k_len] + (op_seed[(i*2)%16] >> 1)) % 256, # Add with offset
-                lambda d, k, i, l, op_seed: (d[i] ^ k[(i + l) % k_len] ^ (op_seed[(i*3)%16])) % 256, # Double XOR
-                lambda d, k, i, l, op_seed: (d[i] + (k[(i + l) % k_len] >> 2) ^ (op_seed[(i*4)%16] << 1)) % 256, # Add/XOR mixed
+                lambda d, k, i, l, op_seed: (d[i] ^ k[(i + l) % k_len]) % 256,
+                lambda d, k, i, l, op_seed: (d[i] + k[(i + l) % k_len] + (op_seed[(i*2)%16] >> 1)) % 256,
             ]
-            random.shuffle(op_funcs) # Shuffle operations. MUST be deterministic from seed.
+            random.shuffle(op_funcs) 
 
             for i in range(len(processed_data)):
-                # Dynamic rotation amount, dependent on byte index and layer index for added variance.
-                rotation_amount = (i % 8) + (layer_idx % 3) + 1 
-                
-                # Apply the chosen operation for this byte, cycling through the shuffled operations.
-                operation = op_funcs[i % len(op_funcs)] 
+                rotation_amount = (i % 8) + 1 
+                operation = op_funcs[i % len(op_funcs)]
                 processed_data[i] = operation(processed_data, key, i, layer_idx, op_sequence_seed)
-                
-                # Apply bit rotation (ROL/ROR) after the operation for further obfuscation.
-                if layer_idx % 2 == 0: # Rotate Left (ROL) for even layers.
+                if layer_idx % 2 == 0: # ROL
                     processed_data[i] = ((processed_data[i] << rotation_amount) | (processed_data[i] >> (8 - rotation_amount))) & 0xFF
-                else: # Rotate Right (ROR) for odd layers.
+                else: # ROR
                     processed_data[i] = ((processed_data[i] >> rotation_amount) | (processed_data[i] << (8 - rotation_amount))) & 0xFF
-        
         return bytes(processed_data)
 
     def _multi_compress_obfuscated(self, data, level=9):
-        """
-        Applies multi-stage compression with custom headers and optional data stuffing.
-        This makes decompression non-trivial. Returns original data if it's too small to benefit.
-        """
-        if len(data) < 64: # Do not compress very small data to avoid increasing size.
-            return data
-
+        """Simplified multi-stage compression."""
+        if len(data) < 64: return data
         try:
-            # Layer 1: zlib compression with a custom header for identification.
             compressed_l1 = zlib.compress(data, level=level)
-            # Header 1: DECOAD (3 bytes) + length of compressed_l1 (2 bytes, big-endian).
-            header_l1 = b'\xDE\xC0\xAD' + struct.pack('>H', len(compressed_l1)) 
+            header_l1 = b'\xDE\xC0' + struct.pack('>H', len(compressed_l1)) 
             data_l1 = header_l1 + compressed_l1
-
-            # Layer 2: zlib compression on the result of Layer 1, with a different header and stuffed data.
-            compressed_l2 = zlib.compress(data_l1, level=level)
-            # Stuffing: Add a small amount of random data (5-15 bytes) to obscure the actual compressed data's size and start.
-            stuff_size = random.randint(5, 15)
-            stuff = os.urandom(stuff_size)
-            # Header 2: CAFEBABE (4 bytes) + length of compressed_l2 (4 bytes, big-endian) + stuffed data.
-            header_l2 = b'\xCA\xFE\xBA\xBE' + struct.pack('>I', len(compressed_l2)) + stuff
-            data_l2 = header_l2 + compressed_l2
             
+            compressed_l2 = zlib.compress(data_l1, level=level)
+            stuff_size = random.randint(5, 10)
+            stuff = os.urandom(stuff_size)
+            header_l2 = b'\xCA\xFE' + struct.pack('>I', len(compressed_l2)) + stuff
+            data_l2 = header_l2 + compressed_l2
             return data_l2
-        except zlib.error as e:
-            print(f"Zlib compression error: {e}. Returning original data.", file=sys.stderr)
-            return data # Return original data if compression fails.
+        except zlib.error: return data
 
     def _encode_stages(self, data):
-        """
-        Applies a sequence of complex encodings. The order is critical for the reversal process.
-        Encoding sequence: 1. Base85 -> 2. URL-safe Base64 -> 3. Hex with prefix/suffix -> 4. Scrambled Hex + Base64
-        """
-        # Stage 0: Base85 encoding (more compact than Base64).
+        """Applies simplified encoding stages."""
         encoded_b85 = base64.b85encode(data)
-        
-        # Stage 1: URL-safe Base64 encoding (compatible with URLs and filenames).
         encoded_urlsafe = base64.urlsafe_b64encode(encoded_b85)
-        
-        # Stage 2: Hexadecimal encoding with prefix/suffix for clear identification of this stage.
         encoded_hex = b'XX' + binascii.hexlify(encoded_urlsafe) + b'YY'
         
-        # Stage 3: Scrambled Hex + Base64. This adds a final layer of obfuscation.
-        # The scrambling uses a simple XOR, with key derived from the cipher.
         scrambled_hex_bytearray = bytearray(encoded_hex)
         for i in range(len(scrambled_hex_bytearray)):
-            # Simple XOR scramble based on index and a fixed cycle (0-255).
-            scrambled_hex_bytearray[i] ^= (i % 256) 
+            scrambled_hex_bytearray[i] ^= (i % 128) # Simplified scrambling
         encoded_final = base64.b64encode(bytes(scrambled_hex_bytearray))
-        
         return encoded_final
 
     def _decrypt_strings_for_stub(self, critical_strings_map, initial_key, seed_salt):
-        """
-        Encrypts critical strings using the first cipher key.
-        These encrypted strings will be embedded in the stub and decrypted at runtime by the VM.
-        """
+        """Encrypts critical strings for embedding in the stub."""
         encrypted_strings_dict = {}
         for name, value in critical_strings_map.items():
-            if isinstance(value, str):
-                val_bytes = value.encode('utf-8')
-            elif isinstance(value, bytes):
-                val_bytes = value
-            else: continue # Skip values that are not strings or bytes.
-            
+            val_bytes = value.encode('utf-8') if isinstance(value, str) else value
             encrypted_val = bytearray()
-            # Use a simple offset derived from the string name for variation during encryption.
             name_offset = ord(name[0]) % len(initial_key) 
-            
             for i in range(len(val_bytes)):
-                # XOR encryption with key and offset.
                 encrypted_val.append(val_bytes[i] ^ initial_key[(i + name_offset) % len(initial_key)])
             encrypted_strings_dict[name] = bytes(encrypted_val)
         return encrypted_strings_dict
 
     def _generate_vm_stub_code(self, vm_args, encrypted_strings_map):
-        """Generates the Python stub code string for the VM Executor. This is the core of the output file."""
-        
-        # Format the encrypted strings map into a Python literal string for embedding.
+        """Generates the VM stub code, minimizing complexity."""
         embedded_encrypted_strings = "{\n"
         for name, enc_val in encrypted_strings_map.items():
             embedded_encrypted_strings += f"        '{name}': {repr(enc_val)},\n"
         embedded_encrypted_strings += "    }"
         
-        # The stub code is a template that includes:
-        # - Core Python libraries for operations.
-        # - String decryption logic.
-        # - Environment validation (anti-debugging).
-        # - VM_Executor class with pipeline execution logic.
-        # - The actual encrypted payload, seeds, keys, salt, etc.
         stub_template = f"""
 import marshal, zlib, base64, binascii, hashlib, time, struct, random, sys, os
 
 # --- String Decryption Helper ---
-# Decrypts the critical strings used by the VM, making static analysis much harder.
 def decrypt_strings(encrypted_map, initial_key_hex, seed_salt_hex):
     decrypted_map = {{}}
     initial_key = bytes.fromhex(initial_key_hex)
     seed_salt = bytes.fromhex(seed_salt_hex)
-    
     for name, enc_val in encrypted_map.items():
         decrypted_bytes = bytearray()
-        # Offset logic must exactly match the encoder's for correct decryption.
         name_offset = ord(name[0]) % len(initial_key) 
-        
         for i in range(len(enc_val)):
             decrypted_bytes.append(enc_val[i] ^ initial_key[(i + name_offset) % len(initial_key)])
-            
         decrypted_map[name] = bytes(decrypted_bytes).decode('utf-8', errors='ignore')
     return decrypted_map
 
@@ -241,21 +157,16 @@ class VM_Executor:
         self.layers = num_layers
         self.seed_salt = bytes.fromhex(seed_salt_hex)
         self.initial_key = bytes.fromhex(initial_key_hex)
-        
-        # Decrypt strings immediately upon initialization. self.s will hold all decrypted function names/literals.
         self.s = decrypt_strings(encrypted_strings_map, initial_key_hex, seed_salt_hex)
-        
-        self._validate_environment() # Perform runtime checks (anti-debugging).
-        self.keys = self._derive_keys_for_decipher(self.seed_salt) # Derive all cipher keys for reversal.
+        self._validate_environment()
+        self.keys = self._derive_keys_for_decipher(self.seed_salt)
 
     def _get_callable(self, name_key):
-        """Dynamically resolves and returns a callable or attribute from decrypted strings. Handles module imports and attribute retrieval."""
         try:
-            str_name = self.s[name_key] # Get the decrypted string (e.g., 'zlib.decompress').
+            str_name = self.s[name_key]
             if '.' in str_name:
                 module_name, attr_name = str_name.split('.', 1)
                 module = None
-                # Dynamically import modules based on decrypted names.
                 if module_name == 'zlib': module = __import__('zlib')
                 elif module_name == 'base64': module = __import__('base64')
                 elif module_name == 'binascii': module = __import__('binascii')
@@ -266,17 +177,13 @@ class VM_Executor:
                 elif module_name == 'sys': module = __import__('sys')
                 elif module_name == 'os': module = __import__('os')
                 elif module_name == 'time': module = __import__('time')
-                # Special case for 'exec', which is a built-in function, not from a module.
-                elif module_name == 'exec': return lambda code: exec(code) 
-                else: raise ValueError("Unknown module requested")
-                # Return the attribute (e.g., the function) from the imported module.
+                elif module_name == 'exec': return lambda code: exec(code)
+                else: raise ValueError("Unknown module")
                 return getattr(module, attr_name)
-            else: return str_name # Return the string itself if it's not a callable (e.g., an error message).
-        except Exception:
-            os._exit(1) # Abrupt exit on any failure during callable resolution.
+            else: return str_name
+        except Exception: os._exit(1)
 
     def _derive_keys_for_decipher(self, seed):
-        """Derives cipher keys using the same method as the encoder, ensuring correct keys for decryption."""
         keys = []
         prk = self.s['hashlib_sha256'](seed).digest()
         for i in range(self.layers):
@@ -287,127 +194,82 @@ class VM_Executor:
         return keys
 
     def _validate_environment(self):
-        """Performs runtime checks for debugging presence and basic integrity."""
         try:
-            # Anti-debugging check: if sys.gettrace() is not None, a debugger is attached.
-            if self.s.get('sys_gettrace') and self.s.get('sys_gettrace')() is not None:
-                os._exit(1) # Exit abruptly if a debugger is detected.
+            if self.s.get('sys_gettrace') and self.s.get('sys_gettrace')() is not None: os._exit(1)
         except Exception: os._exit(1)
-        # Basic integrity check: ensure critical functions (like zlib.decompress) are available and decrypted.
         if not self.s.get('zlib_decompress'): os._exit(1)
 
     def _decompress_multi_stage(self, data):
-        """Reverses the multi-stage compression process, handling headers and stuffing."""
         try:
-            # Iterate through data to find the correct decompression start point (handles stuffed data)
             for i in range(len(data)):
                 try:
-                    # Try decompressing from the current index.
                     decompressed_l1 = self.s['zlib_decompress'](data[i:])
-                    
-                    # Check for Header 1: DECOAD (3 bytes) + length of compressed_l1 (2 bytes)
                     if decompressed_l1.startswith(self.s['header_l1_prefix']):
                         compressed_len_l1 = self.s['struct_unpack']('>H', decompressed_l1[3:5])[0]
                         inner_compressed_data = decompressed_l1[5 : 5 + compressed_len_l1]
-                        
-                        # Decompress Layer 1 data (which is zlib compressed).
                         decompressed_l0 = self.s['zlib_decompress'](inner_compressed_data)
-                        return decompressed_l0 # This is the final decompressed data from this stage.
-                except Exception: continue # If decompression or header check fails, try the next index.
-            raise Exception("Invalid compressed data or header detected during decompression.")
-        except Exception: os._exit(1) # Abrupt exit on any decompression failure.
+                        return decompressed_l0
+                except Exception: continue
+            raise Exception("Invalid compressed data or header.")
+        except Exception: os._exit(1)
 
     def _reverse_poly_cipher_layer(self, data, layer_index):
-        """Reverses a single layer of the polymorphic cipher."""
-        key = self.keys[layer_index] # Use the pre-derived key for this specific layer.
+        key = self.keys[layer_index]
         key_len = len(key)
         processed_data = bytearray(data)
         
-        # Deterministically recreate the operation sequence seed based on the layer's key.
         op_sequence_seed = self.s['hashlib_sha256'](key).digest()
-        self.s['random_seed'](op_sequence_seed) # Seed the random generator to reproduce operation and rotation choices.
+        self.s['random_seed'](op_sequence_seed)
         
-        # Process data in reverse order to undo operations correctly (especially rotations).
         for i in range(len(processed_data) - 1, -1, -1):
-            # Undo rotation first: The inverse of ROL is ROR, and inverse of ROR is ROL.
-            rotation_amount = (i % 8) + (layer_idx % 3) + 1 # Dynamic rotation amount used in encoder.
-            if layer_index % 2 == 0: # If encoder did ROL, we now do ROR.
+            rotation_amount = (i % 8) + 1 
+            if layer_index % 2 == 0: # ROL inverse is ROR
                 inv_rotation_amount = 8 - rotation_amount
                 processed_data[i] = ((processed_data[i] >> inv_rotation_amount) | (processed_data[i] << (8 - inv_rotation_amount))) & 0xFF
-            else: # If encoder did ROR, we now do ROL.
+            else: # ROR inverse is ROL
                 inv_rotation_amount = 8 - rotation_amount
                 processed_data[i] = ((processed_data[i] << inv_rotation_amount) | (processed_data[i] >> (8 - inv_rotation_amount))) & 0xFF
             
-            # Undo operations: This part requires EXACT inverse functions for each operation.
-            # The simplified inverse used here (XOR with key) is for demonstration.
-            # A robust cipher would have specific inverse functions for Add, Mixed Ops, etc.
-            processed_data[i] ^= key[(i + layer_index) % key_len]
+            processed_data[i] ^= key[(i + layer_index) % key_len] # Simplified inverse for XOR
             
         return bytes(processed_data)
 
     def execute_pipeline(self):
-        """Reverses all encoding, compression, and cipher transformations and executes the final payload."""
-        
-        current_data = self.payload # Start with the fully encoded data.
+        current_data = self.payload
         
         # --- Phase 1: Reverse Encoding Stages ---
-        # Reverse the sequence of encoding stages applied by the encoder.
-        # Encoding order was: Base85 -> URLSafeBase64 -> Hex -> ScrambledHex+Base64
-        # So, we must reverse them in the order: FinalScrambledBase64 -> Hex -> URLSafeBase64 -> Base85.
-        
         try:
-            # Stage 3: Reverse Final Base64 + Scrambled Hex
-            # First, decode the outermost Base64.
             decoded_final_b64 = self.s['base64_b64decode'](current_data)
-            # Then, descramble the Hex data using the same logic and key as encoding.
             scrambled_hex_bytearray = bytearray(decoded_final_b64)
-            for i in range(len(scrambled_hex_bytearray)):
-                scrambled_hex_bytearray[i] ^= (i % 256) # Inverse of the scramble operation.
+            for i in range(len(scrambled_hex_bytearray)): scrambled_hex_bytearray[i] ^= (i % 128) # Inverse scramble
             current_data = bytes(scrambled_hex_bytearray)
 
-            # Stage 2: Reverse Hex Prefix/Suffix and Hexlify
-            # Check for and remove the 'XX' and 'YY' prefixes/suffixes.
-            if not current_data.startswith(self.s['header_l1_prefix']) or not current_data.endswith(self.s['header_l2_prefix']):
-                raise ValueError("Invalid hex prefix/suffix found.")
-            current_data = current_data[2:-2] # Remove 'XX' and 'YY'.
-            current_data = self.s['binascii_unhexlify'](current_data) # Decode from Hex.
+            if not current_data.startswith(self.s['header_l1_prefix']) or not current_data.endswith(self.s['header_l2_prefix']): raise ValueError("Invalid hex prefix/suffix.")
+            current_data = current_data[2:-2]
+            current_data = self.s['binascii_unhexlify'](current_data)
 
-            # Stage 1: Reverse URL-safe Base64
             current_data = self.s['base64_urlsafe_b64decode'](current_data)
-
-            # Stage 0: Reverse Base85
             current_data = self.s['base64_b85decode'](current_data)
-        except Exception: os._exit(1) # Abrupt exit on any encoding reversal error.
+        except Exception: os._exit(1)
 
         # --- Phase 2: Interleaved Decompression and Cipher Decryption ---
-        # Iterate through cipher layers in reverse order (from N-1 down to 0).
-        # If compression was applied for a specific cipher layer in the encoder,
-        # decompress it BEFORE deciphering that layer's data.
-        
         for i in range(self.layers - 1, -1, -1):
-            # Check if compression was applied for THIS cipher layer (encoder condition: i % 3 == 0).
-            if i % 3 == 0:
-                try:
-                    current_data = self._decompress_multi_stage(current_data)
+            if i % 3 == 0: 
+                try: current_data = self._decompress_multi_stage(current_data)
                 except Exception: os._exit(1)
-
-            # Decipher this cipher layer's data.
-            try:
-                current_data = self._reverse_poly_cipher_layer(current_data, i)
+            try: current_data = self._reverse_poly_cipher_layer(current_data, i)
             except Exception: os._exit(1)
 
         # --- Phase 3: Final Unmarshalling and Execution ---
         try:
-            # The final `current_data` should now be the original marshalled Python code object.
             code_object = self.s['marshal_loads'](current_data)
-            self.s['exec_call'](code_object) # Execute the original Python code.
-        except Exception: os._exit(1) # Abrupt exit on final execution failure.
+            self.s['exec_call'](code_object)
+        except Exception: os._exit(1)
 
 # --- Bot Controller Class ---
 class BotController:
     def __init__(self, bot_token):
         self.bot = telebot.TeleBot(bot_token)
-        # Initialize ObfuscationEngine with desired layers (e.g., 7 is a good balance).
         self.obfuscator = ObfuscationEngine(layers=7) 
         self.setup_handlers()
 
@@ -415,31 +277,15 @@ class BotController:
         """Sets up the message handlers for the Telegram bot."""
         @self.bot.message_handler(commands=['start', 'help'])
         def send_welcome(message):
-            # Using textual description for emojis for maximum compatibility across platforms/environments.
-            welcome_msg = """
-🌟 **ULTRA SECURE Python Obfuscator Bot (v4.1)** 🌟
-
-Protect your Python code with multiple layers of sophisticated obfuscation!
-
-**Features:**
-• **Deep Obfuscation:** Dynamic key generation, polymorphic ciphers, interleaved compression/encoding.
-• **Runtime Complexity:** Control flow obfuscation, string encryption, anti-debugging, lightweight VM.
-• **Multi-Stage Defense:** Combines zlib compression with custom headers, Base85, Base64 variants, and Hex encodings.
-• **Resilient Decoder:** Designed to be extremely difficult to reverse-engineer.
-
-🚀 **Usage:**
-Send a `.py` file or a Python code snippet. The bot will return a highly obfuscated version.
-
-⚠️ **Disclaimer:**
-This bot is for educational and research purposes only. While highly obfuscated, it is not unbreakable. Use responsibly.
-"""
-            self.bot.reply_to(message, welcome_msg, parse_mode='Markdown')
+            welcome_msg = """Hello! This is the Ultra Secure Python Obfuscator Bot.
+Send me a .py file or Python code snippet, and I'll return an obfuscated version.
+For more info on features, send /help."""
+            self.bot.reply_to(message, welcome_msg)
 
         @self.bot.message_handler(content_types=['document'])
         def handle_document(message):
             try:
                 file_info = self.bot.get_file(message.document.file_id)
-                # Ensure the uploaded file is a Python file.
                 if not file_info.file_name.lower().endswith('.py'):
                     self.bot.reply_to(message, "❌ Please send a Python (.py) file only!")
                     return
@@ -447,32 +293,27 @@ This bot is for educational and research purposes only. While highly obfuscated,
                 self.bot.reply_to(message, "🔒 Processing your file with advanced obfuscation...")
                 
                 downloaded_file = self.bot.download_file(file_info.file_path)
-                # Decode file content, ignore errors for robustness against malformed files.
                 source_code = downloaded_file.decode('utf-8', errors='ignore')
 
-                # Check if the file is empty or contains only whitespace.
                 if not source_code.strip():
                     self.bot.reply_to(message, "❌ The provided file is empty or contains no executable code.")
                     return
                 
-                # Obfuscate the source code.
                 encoded_code = self.obfuscate_code(source_code)
                 
-                # Save the obfuscated code to a temporary file.
                 temp_file_path = os.path.join(self.obfuscator.temp_dir, f"ultra_secure_{file_info.file_name}")
                 with open(temp_file_path, 'w', encoding='utf-8') as f:
                     f.write(encoded_code)
                 
-                # Send the obfuscated code back to the user as a document.
                 with open(temp_file_path, 'rb') as f:
                     self.bot.send_document(
                         message.chat.id,
                         f,
-                        caption="✨ Your ULTRA SECURE obfuscated Python script!",
+                        caption="Your ULTRA SECURE obfuscated Python script!",
                         visible_file_name=f"ultra_secure_{file_info.file_name}"
                     )
                 
-                os.unlink(temp_file_path) # Clean up the temporary file.
+                os.unlink(temp_file_path)
                 
             except telebot.apihelper.ApiTelegramException as e:
                 self.handle_error(message, f"Telegram API Error: {e}")
@@ -482,47 +323,34 @@ This bot is for educational and research purposes only. While highly obfuscated,
         @self.bot.message_handler(func=lambda message: True)
         def handle_text(message):
             text = message.text
-            # Basic check to see if the message resembles Python code.
             python_indicators = ['import ', 'def ', 'class ', 'print(', 'if ', 'for ', 'while ', '=', '{', '}']
             if not any(indicator in text for indicator in python_indicators) and len(text.splitlines()) < 2:
-                welcome_msg = """
-📝 **Send me Python code to obfuscate!**
-
-You can send:
-• A Python code snippet directly.
-• A `.py` file as a document.
-
-Example snippet:
+                welcome_msg = """Send me Python code or a .py file for obfuscation!
+Example:
 ```python
-def greet(name):
-    print(f"Hello, {name}!")
-
-greet("World")
+print("Hello")
 ```"""
-                self.bot.reply_to(message, welcome_msg, parse_mode='Markdown')
+                self.bot.reply_to(message, welcome_msg)
                 return
             
-            self.bot.reply_to(message, "🔒 Applying advanced obfuscation to your code...")
+            self.bot.reply_to(message, "🔒 Applying obfuscation...")
             
             try:
-                # Obfuscate the provided code snippet.
                 encoded_code = self.obfuscate_code(text)
                 
-                # Save the obfuscated code to a temporary file.
                 temp_file_path = os.path.join(self.obfuscator.temp_dir, "ultra_secure_script.py")
                 with open(temp_file_path, 'w', encoding='utf-8') as f:
                     f.write(encoded_code)
                 
-                # Send the obfuscated code back to the user as a document.
                 with open(temp_file_path, 'rb') as f:
                     self.bot.send_document(
                         message.chat.id,
                         f,
-                        caption="✨ Your ULTRA SECURE obfuscated Python code!",
+                        caption="Your ULTRA SECURE obfuscated Python code!",
                         visible_file_name="ultra_secure_script.py"
                     )
                 
-                os.unlink(temp_file_path) # Clean up the temporary file.
+                os.unlink(temp_file_path)
                 
             except telebot.apihelper.ApiTelegramException as e:
                 self.handle_error(message, f"Telegram API Error: {e}")
@@ -532,82 +360,59 @@ greet("World")
     def obfuscate_code(self, source_code):
         """Orchestrates the obfuscation process for a given source code string."""
         try:
-            # 1. Marshal the source code into a byte stream.
-            # This converts Python code objects into a byte format that's harder to read statically.
             code = compile(source_code, "<obfuscated_source>", "exec")
             payload = marshal.dumps(code)
             
-            # 2. Generate unique seeds and derive keys for cipher layers.
-            base_seed = os.urandom(16) # Initial seed material for key derivation.
-            # Generate seeds for each cipher layer.
+            base_seed = os.urandom(16) 
             seeds = [self.obfuscator._generate_complex_seed(base_seed + struct.pack('>I', i)) for i in range(self.obfuscator.layers)]
-            # Derive all cryptographic keys from the base seed using the HKDF-like process.
             keys = self.obfuscator._derive_keys(base_seed) 
 
-            # 3. Apply chained transformations: Cipher -> (Compress if needed)
             transformed_data = payload
             for i in range(self.obfuscator.layers):
-                # Apply polymorphic cipher for this layer using its specific key.
                 transformed_data = self.obfuscator._poly_cipher(transformed_data, [keys[i]])
-                
-                # Apply compression if required for this cipher layer (encoder condition: i % 3 == 0).
-                if i % 3 == 0:
+                if i % 3 == 0: 
                     transformed_data = self.obfuscator._multi_compress_obfuscated(transformed_data)
             
-            # 4. Apply final encoding stages sequentially.
-            # `transformed_data` is the output of the last cipher/compression step.
-            # The sequence of encodings applied is: Base85 -> URLSafeBase64 -> Hex -> ScrambledBase64.
             final_encoded_payload = self.obfuscator._encode_stages(transformed_data)
             
-            # 5. Define critical strings and encrypt them for the stub.
             critical_strings_map = {
                 "zlib_decompress": "zlib.decompress", "base64_b85decode": "base64.b85decode",
                 "base64_urlsafe_b64decode": "base64.urlsafe_b64decode", "base64_b64decode": "base64.b64decode",
                 "binascii_unhexlify": "binascii.unhexlify", "binascii_hexlify": "binascii.hexlify",
                 "hashlib_sha256": "hashlib.sha256", "marshal_loads": "marshal.loads",
                 "struct_pack": "struct.pack", "struct_unpack": "struct.unpack",
-                "random_randint": "random.randint", "random_seed": "random.seed",
-                "sys_gettrace": "sys.gettrace", "os_exit": "os._exit",
-                "exec_call": "exec", "compile_call": "compile",
-                "Exception": "Exception", "debug_detected": "DEBUGGER DETECTED",
-                "tamper_error": "DATA TAMPERING OR DECRYPTION FAILURE DETECTED",
-                "header_l1_prefix": b'\xDE\xC0\xAD', "header_l2_prefix": b'\xCA\xFE\xBA\xBE', # Headers for compression stages.
-                "seed_salt_hex": self.obfuscator.seed_salt.hex(), # Include salt for consistent key derivation.
+                "random_seed": "random.seed", "sys_gettrace": "sys.gettrace",
+                "os_exit": "os._exit", "exec_call": "exec", "Exception": "Exception",
+                "header_l1_prefix": b'\xDE\xC0', "header_l2_prefix": b'\xCA\xFE', 
+                "seed_salt_hex": self.obfuscator.seed_salt.hex(),
             }
-            # Encrypt these strings using the first cipher key.
             encrypted_strings_dict = self.obfuscator._decrypt_strings_for_stub(critical_strings_map, keys[0], self.obfuscator.seed_salt)
             
-            # 6. Prepare arguments for the VM stub constructor.
             vm_args = {
                 "encrypted_payload": final_encoded_payload,
                 "seeds_list": seeds,
                 "key_size": self.obfuscator.key_size,
                 "num_layers": self.obfuscator.layers,
                 "seed_salt_hex": self.obfuscator.seed_salt.hex(),
-                "initial_key_hex": keys[0].hex() # Use the first key for string decryption.
+                "initial_key_hex": keys[0].hex() 
             }
             
-            # 7. Generate the final stub code string, embedding the VM arguments and encrypted strings.
             stub_code = self.obfuscator._generate_vm_stub_code(vm_args, encrypted_strings_dict)
             
             return stub_code
             
         except Exception as e:
-            # Log internal errors and raise a user-friendly message.
             print(f"ERROR: Failed to obfuscate code: {e}", file=sys.stderr)
             raise ValueError("Obfuscation failed due to an internal error. Please try again.")
 
     def handle_error(self, message, error_msg):
-        """Handles bot errors and replies to the user with a generic error message."""
         print(f"BOT ERROR: {error_msg}", file=sys.stderr)
-        self.bot.reply_to(message, f"❌ An error occurred: {error_msg}")
+        self.bot.reply_to(message, f"❌ An error occurred.")
 
     def start_polling(self):
-        """Starts the Telegram bot polling loop to listen for messages."""
         print("🤖 Starting Telegram Bot polling...")
         while True:
             try:
-                # `infinity_polling` keeps the bot running continuously by automatically handling reconnects.
                 self.bot.infinity_polling(timeout=10, long_polling_timeout=5)
             except telebot.apihelper.ApiTelegramException as e:
                 print(f"Telegram API Exception: {e}. Retrying in 5 seconds...")
@@ -617,26 +422,22 @@ greet("World")
                 time.sleep(10)
 
     def start_webserver(self):
-        """Starts the Flask web server for health checks. Runs in a separate thread."""
         port = int(os.environ.get('PORT', 5000))
         print(f"🌐 Starting Flask server on port {port}")
         try:
-            # Run Flask in a separate thread so it doesn't block bot polling.
             server_thread = Thread(target=lambda: app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False))
-            server_thread.daemon = True # Allows the main program to exit even if this thread is still running.
+            server_thread.daemon = True
             server_thread.start()
         except Exception as e:
             print(f"Error starting Flask server: {e}", file=sys.stderr)
 
 # --- Main Execution Block ---
 if __name__ == "__main__":
-    # Basic validation for the bot token.
-    if not BOT_TOKEN or BOT_TOKEN == "YOUR_PLACEHOLDER_BOT_TOKEN":
-        print("ERROR: BOT_TOKEN is not configured. Please set the BOT_TOKEN environment variable in your Render service or for local testing.")
+    if not BOT_TOKEN:
+        print("ERROR: BOT_TOKEN is not configured. Please set the BOT_TOKEN environment variable.")
         sys.exit(1)
 
-    # Clean up any old temporary directories from previous runs.
-    # This helps prevent disk space issues if temp files are not cleaned up automatically.
+    # Cleanup old temp directories
     try:
         temp_dir_pattern = os.path.join(tempfile.gettempdir(), "obfuscator_*")
         for dir_path in glob.glob(temp_dir_pattern):
@@ -646,9 +447,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Error during initial temp directory cleanup: {e}", file=sys.stderr)
 
-    # Initialize the BotController with the BOT_TOKEN.
     bot_controller = BotController(BOT_TOKEN)
-    
-    # Start the web server and bot polling concurrently.
     bot_controller.start_webserver() 
     bot_controller.start_polling()
