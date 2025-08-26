@@ -1,7 +1,3 @@
+# requirements.txt
 pyTelegramBotAPI
 Flask
-# Navigate to your project directory in your terminal
-git add main.py
-git add requirements.txt
-git commit -m "feat: Add full v3.1 obfuscated bot code and deploy configs"
-git push origin main # Or your default branch name (e.g., master)
