@@ -135,7 +135,7 @@ class AayuAdvancedEncoder:
                         f'"{self.generate_random_string(20)}"',
                         str(random.randint(1000, 999999)),
                         f'[{", ".join(str(random.randint(1, 100)) for _ in range(random.randint(3, 8)))}]',
-                        f'{{", ".join(f"\'{self.generate_random_string(5)}\': {random.randint(1, 1000)}" for _ in range(random.randint(2, 5)))}},',
+                        f'{{", ".join(f"\'{self.generate_random_string(5)}\': {random.randint(1, 1000)}" for _ in range(random.randint(2, 5)))}}',
                     ])
                     method_body.append(f'        {var} = {val}')
                 
