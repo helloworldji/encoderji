@@ -135,7 +135,7 @@ class AayuAdvancedEncoder:
                         f'"{self.generate_random_string(20)}"',
                         str(random.randint(1000, 999999)),
                         f'[{", ".join(str(random.randint(1, 100)) for _ in range(random.randint(3, 8)))}]',
-                        f'{{", ".join(f"\'{self.generate_random_string(5)}\': {random.randint(1, 1000)}" for _ in range(random.randint(2, 5)))}}',
+                        f'{{{", ".join(f"\'{self.generate_random_string(5)}\': {random.randint(1, 1000)}" for _ in range(random.randint(2, 5)))}}}',
                     ])
                     method_body.append(f'        {var} = {val}')
                 
@@ -318,49 +318,31 @@ class AayuAdvancedEncoder:
             # Generate ultra-secure password
             password = hashlib.sha512(f"{user_id}_{secrets.token_hex(32)}_{random.randint(100000, 999999)}".encode()).hexdigest()[:32]
             
-            print("🔄 Step 1/7: Injecting dummy code...")
             # Step 1: Inject massive dummy code
             code = self.inject_mega_dummy_code(original_code)
             
-            print("🔄 Step 2/7: Advanced string obfuscation...")
             # Step 2: Advanced string obfuscation
             try:
                 code = self.advanced_string_obfuscation(code)
             except:
-                pass  # Continue if syntax errors
+                pass
             
-            print("🔄 Step 3/7: Import scrambling...")
             # Step 3: Advanced import scrambling
             code = self.advanced_import_scrambling(code)
             
-            print("🔄 Step 4/7: Chaos scrambling...")
             # Step 4: Chaos scrambling
             code = self.chaos_scramble(code, rounds=3)
             
-            print("🔄 Step 5/7: Multi-compression...")
             # Step 5: Multi-layer compression
             compressed_data, compression_method, compression_ratio = self.multi_compression(code)
             
-            print("🔄 Step 6/7: Quantum encryption...")
             # Step 6: Quantum encryption
             encrypted_data, salt_hex, xor_key_length = self.quantum_encrypt(compressed_data, password)
             
-            print("🔄 Step 7/7: Building protection wrapper...")
             # Step 7: Create ultimate protection wrapper
             protection_layers = f'''
-# ╔══════════════════════════════════════════════════════════════════════════════╗
-# ║                            AAYU ENCODER                                      ║
-# ║                         Advanced Python Protector                           ║
-# ║                                                                              ║
-# ║  🔒 PROTECTED BY: {BOT_NAME}                                    ║
-# ║  👨‍💻 CREATOR: {CREATOR_ID}                                          ║
-# ║  🛡️  SECURITY LEVEL: MAXIMUM                                                ║
-# ║  ⚡ PROTECTION LAYERS: 7                                                     ║
-# ║                                                                              ║
-# ║  ⚠️  WARNING: Unauthorized reverse engineering is strictly prohibited       ║
-# ║  📧 FOR SUPPORT: {CREATOR_ID}                                       ║
-# ╚══════════════════════════════════════════════════════════════════════════════╝
-
+# Protected by {BOT_NAME}
+# Creator: {CREATOR_ID}
 import base64, secrets, hashlib, zlib, gzip, bz2, lzma, codecs, random, string
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
@@ -460,8 +442,6 @@ class __AAYU_DECODER__:
     
     def __execute_protected_code(self):
         try:
-            print("🔓 AAYU DECODER: Initializing decryption process...")
-            
             # Step 1: Quantum decrypt
             compressed_scrambled = self.__quantum_decrypt(self.__encrypted_data, self.__password)
             
@@ -470,10 +450,6 @@ class __AAYU_DECODER__:
             
             # Step 3: Reverse chaos scramble
             final_code = self.__reverse_chaos_scramble(scrambled_code)
-            
-            print("✅ AAYU DECODER: Code successfully decrypted and executed!")
-            print(f"🔒 Protected by {BOT_NAME} | Creator: {CREATOR_ID}")
-            print("="*60)
             
             # Execute the code
             exec(final_code, globals())
@@ -509,80 +485,29 @@ encoder = AayuAdvancedEncoder()
 
 @bot.message_handler(commands=['start'])
 def start_command(message):
-    welcome_animation = """
+    welcome_animation = f"""
 🔥 **AAYU ENCODER BOT** 🔥
-*Advanced Python Code Protection System*
-
-╔══════════════════════════════════════╗
-║         🛡️  ULTIMATE PROTECTION 🛡️     ║
-║                                      ║
-║  🔒 7-Layer Security Architecture    ║
-║  ⚡ Quantum-Level Encryption         ║
-║  🎭 Advanced Code Obfuscation        ║
-║  🗜️ Multi-Algorithm Compression      ║
-║  🧬 DNA-Level Code Scrambling        ║
-║  🔐 Military-Grade Key Generation    ║
-║  🛡️ Anti-Reverse Engineering         ║
-╚══════════════════════════════════════╝
-
-**🚀 FEATURES:**
-• **Quantum Encryption**: AES + Fernet + XOR layers
-• **Chaos Scrambling**: 7-round data transformation
-• **Smart Compression**: Auto-select best algorithm
-• **Mega Dummy Code**: 1000+ lines of realistic decoys
-• **Advanced Obfuscation**: String + Import scrambling
-• **Size Optimization**: Intelligent compression
-• **Zero Reversibility**: Maximum protection guarantee
-
-**📊 PERFORMANCE:**
-✅ Protection Level: **MAXIMUM**
-✅ Size Increase: **2-4x optimized**
-✅ Decode Difficulty: **EXTREME**
-✅ Success Rate: **100%**
-
-**🎯 HOW TO USE:**
-1️⃣ Send your Python file (.py)
-2️⃣ Or paste your code directly
-3️⃣ Get ultra-protected version instantly!
-
-**👨‍💻 Created by:** {CREATOR_ID}
-**🆔 Bot Name:** {BOT_NAME}
-
-**⚠️ IMPORTANT:**
-Protected code requires: `pip install cryptography`
-
-📄 **Send your Python code to begin ultimate protection!**
-""".format(CREATOR_ID=CREATOR_ID, BOT_NAME=BOT_NAME)
-
+**Created by:** {CREATOR_ID}
+"""
     bot.reply_to(message, welcome_animation, parse_mode='Markdown')
 
 @bot.message_handler(content_types=['document'])
 def handle_file(message):
     try:
-        # Check file type
         if not message.document.file_name.endswith('.py'):
             bot.reply_to(message, f"❌ **AAYU ENCODER BOT ERROR**\n\nOnly Python (.py) files accepted!\n\n📧 Support: {CREATOR_ID}", parse_mode='Markdown')
             return
         
-        # Check file size (limit to 15MB for better processing)
         if message.document.file_size > 15 * 1024 * 1024:
             bot.reply_to(message, f"❌ **FILE TOO LARGE**\n\nMaximum size: 15MB\nYour file: {message.document.file_size / 1024 / 1024:.1f}MB\n\n📧 Support: {CREATOR_ID}", parse_mode='Markdown')
             return
         
-        # Download and process
         file_info = bot.get_file(message.document.file_id)
         downloaded_file = bot.download_file(file_info.file_path)
         
         processing_msg = bot.reply_to(
             message, 
-            f"🔥 **AAYU ENCODER BOT ACTIVATED** 🔥\n\n"
-            f"📁 File: `{message.document.file_name}`\n"
-            f"📊 Size: {message.document.file_size:,} bytes\n"
-            f"🛡️ Protection Level: **MAXIMUM**\n\n"
-            f"⚡ **PROCESSING STAGES:**\n"
-            f"🔄 Initializing quantum encryption...\n"
-            f"⏳ This may take 30-60 seconds for ultimate protection\n\n"
-            f"🤖 Powered by: **{BOT_NAME}**", 
+            "🔄 Processing your file... Please wait.", 
             parse_mode='Markdown'
         )
         
@@ -595,41 +520,134 @@ def handle_file(message):
                 bot.reply_to(message, f"❌ **ENCODING ERROR**\n\nCannot decode file. Ensure it's a valid Python file.\n\n📧 Support: {CREATOR_ID}", parse_mode='Markdown')
                 return
         
-        # Apply mega protection
         try:
             protected_code, stats = encoder.mega_protect_code(original_code, message.from_user.id)
         except Exception as e:
             bot.reply_to(message, f"❌ **PROTECTION FAILED**\n\n```\n{str(e)}\n```\n\n📧 Contact: {CREATOR_ID}", parse_mode='Markdown')
             return
         
-        # Create protected file
         protected_filename = f"AAYU_PROTECTED_{message.document.file_name}"
         
         with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.py', encoding='utf-8') as temp_file:
             temp_file.write(protected_code)
             temp_file_path = temp_file.name
         
-        # Prepare success message
-        success_msg = f"""
-🎉 **PROTECTION COMPLETED SUCCESSFULLY!** 🎉
+        success_msg = f"🎉 Protection complete!\n\nProtected by {BOT_NAME}\nCreator: {CREATOR_ID}"
+        
+        with open(temp_file_path, 'rb') as protected_file:
+            bot.send_document(
+                message.chat.id,
+                protected_file,
+                caption=success_msg,
+                parse_mode='Markdown'
+            )
+        
+        os.unlink(temp_file_path)
+        bot.delete_message(message.chat.id, processing_msg.message_id)
+        
+    except Exception as e:
+        bot.reply_to(message, f"❌ **SYSTEM ERROR**\n\n```\n{str(e)}\n```\n\n📧 Contact: {CREATOR_ID} for immediate support!", parse_mode='Markdown')
 
-🔥 **AAYU ENCODER BOT STATS** 🔥
-╔══════════════════════════════════════╗
-║  📁 Original Size: {stats['original_size']:,} bytes
-║  🔒 Protected Size: {stats['protected_size']:,} bytes  
-║  📈 Size Ratio: {stats['size_increase_ratio']:.2f}x
-║  🗜️ Compression: {stats['compression_method'].upper()}
-║  📊 Compress Ratio: {stats['compression_ratio']:.3f}
-║  🎭 Dummy Lines: +{stats['dummy_code_lines']:,}
-║  🛡️ Protection Layers: {stats['protection_layers']}
-╚══════════════════════════════════════╝
+@bot.message_handler(content_types=['text'])
+def handle_text_code(message):
+    try:
+        if message.text.startswith('/') or len(message.text) < 100:
+            bot.reply_to(
+                message, 
+                "Please send a Python file or paste a complete code block (min 100 characters).", 
+                parse_mode='Markdown'
+            )
+            return
+        
+        python_indicators = ['import ', 'def ', 'class ', 'if ', 'for ', 'while ', 'print(', 'return ', 'try:', 'except:']
+        if not any(indicator in message.text.lower() for indicator in python_indicators):
+            bot.reply_to(
+                message, 
+                "🤔 **INVALID PYTHON CODE**\n\nCode must contain Python syntax.\n\n📧 Support: {CREATOR_ID}", 
+                parse_mode='Markdown'
+            )
+            return
+        
+        processing_msg = bot.reply_to(
+            message, 
+            "🔄 Processing your code... Please wait.", 
+            parse_mode='Markdown'
+        )
+        
+        try:
+            protected_code, stats = encoder.mega_protect_code(message.text, message.from_user.id)
+        except Exception as e:
+            bot.edit_message_text(
+                f"❌ **PROTECTION FAILED**\n\n```\n{str(e)}\n```\n\n📧 Contact: {CREATOR_ID}", 
+                message.chat.id, 
+                processing_msg.message_id, 
+                parse_mode='Markdown'
+            )
+            return
+        
+        protected_filename = f"AAYU_PROTECTED_CODE_{message.from_user.id}_{random.randint(1000,9999)}.py"
+        
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.py', encoding='utf-8') as temp_file:
+            temp_file.write(protected_code)
+            temp_file_path = temp_file.name
+        
+        success_msg = f"🎉 Protection complete!\n\nProtected by {BOT_NAME}\nCreator: {CREATOR_ID}"
+        
+        with open(temp_file_path, 'rb') as protected_file:
+            bot.send_document(
+                message.chat.id,
+                protected_file,
+                caption=success_msg,
+                parse_mode='Markdown'
+            )
+        
+        os.unlink(temp_file_path)
+        bot.delete_message(message.chat.id, processing_msg.message_id)
+        
+    except Exception as e:
+        bot.reply_to(message, f"❌ **SYSTEM CRITICAL ERROR**\n\n```\n{str(e)}\n```\n\n🆘 Emergency Support: {CREATOR_ID}", parse_mode='Markdown')
 
-🔐 **SECURITY FEATURES APPLIED:**
-✅ Quantum Multi-Layer Encryption
-✅ Advanced Code Obfuscation  
-✅ Chaos Data Scrambling
-✅ Mega Dummy Code Injection
-✅ Import Statement Scrambling
-✅ Smart Multi-Compression
-✅ Anti-Reverse Engineering
-
+# Main execution
+if __name__ == "__main__":
+    if BOT_TOKEN == 'YOUR_BOT_TOKEN_HERE':
+        exit(1)
+    
+    if os.getenv('RENDER') or os.getenv('PORT'):
+        try:
+            from flask import Flask, request
+            
+            app = Flask(__name__)
+            
+            @app.route('/webhook', methods=['POST'])
+            def webhook():
+                try:
+                    json_string = request.get_data().decode('utf-8')
+                    update = telebot.types.Update.de_json(json_string)
+                    bot.process_new_updates([update])
+                    return "OK", 200
+                except Exception as e:
+                    return "ERROR", 500
+            
+            @app.route('/')
+            def index():
+                return "Bot is running.", 200
+            
+            @app.route('/health')
+            def health():
+                return "🟢 HEALTHY", 200
+            
+            webhook_url = f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME', 'localhost')}/webhook"
+            bot.remove_webhook()
+            bot.set_webhook(url=webhook_url)
+            
+            port = int(os.getenv('PORT', 10000))
+            app.run(host='0.0.0.0', port=port, debug=False)
+            
+        except ImportError:
+            exit(1)
+            
+    else:
+        try:
+            bot.infinity_polling(none_stop=True, interval=1, timeout=60)
+        except Exception as e:
+            exit(1)
