@@ -633,6 +633,3 @@ def handle_file(message):
 ✅ Smart Multi-Compression
 ✅ Anti-Reverse Engineering
 
-⚡ **REQUIREMENTS FOR PROTECTED CODE:**
-```bash
-pip install cryptography
