@@ -109,7 +109,7 @@ class AayuAdvancedEncoder:
             
             final = encoded.decode()
             
-            return f'__import__("base64").b32decode(__import__("bytes").fromhex(__import__("base64").b64decode("{base64.b64encode(final.encode()).decode()}").decode())).decode()'
+            return f'__import__("base64").b32decode(__import__("bytes").fromhex(__import__("base64").b64decode("{base64.b64encode(final.encode()).decode()}").decode()).decode()).decode()'
         
         return re.sub(r'(["\'])((?:(?!\1)[^\\]|\\.)*)(\1)', obfuscate_string, code)
     
@@ -135,7 +135,7 @@ class AayuAdvancedEncoder:
                         f'"{self.generate_random_string(20)}"',
                         str(random.randint(1000, 999999)),
                         f'[{", ".join(str(random.randint(1, 100)) for _ in range(random.randint(3, 8)))}]',
-                        f'{{{", ".join(f"\\"{self.generate_random_string(5)}\\": {random.randint(1, 1000)}" for _ in range(random.randint(2, 5)))}}}',
+                        f'{{", ".join(f"\'{self.generate_random_string(5)}\': {random.randint(1, 1000)}" for _ in range(random.randint(2, 5)))}},',
                     ])
                     method_body.append(f'        {var} = {val}')
                 
@@ -204,7 +204,7 @@ class AayuAdvancedEncoder:
                 items = [f'"{self.generate_random_string(10)}"' for _ in range(random.randint(10, 30))]
                 dummy_variables.append(f'{var_name} = [{", ".join(items)}]')
             elif var_type == 'dict':
-                items = [f'"{self.generate_random_string(8)}": {random.randint(1, 1000)}' for _ in range(random.randint(5, 15))]
+                items = [f"'{self.generate_random_string(8)}': {random.randint(1, 1000)}" for _ in range(random.randint(5, 15))]
                 dummy_variables.append(f'{var_name} = {{{", ".join(items)}}}')
         
         # Combine all dummy code
