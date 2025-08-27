@@ -23,14 +23,14 @@ import gzip
 import bz2
 import lzma
 
-# AAYU ENCODER BOT Configuration
-BOT_TOKEN = os.getenv('BOT_TOKEN', 'YOUR_BOT_TOKEN_HERE')
-CREATOR_ID = "@AAYUXFR"
-BOT_NAME = "AAYU ENCODER BOT"
+# Aadi ENCODER BOT Configuration
+BOT_TOKEN = os.getenv('BOT_TOKEN', '8241335689:AAFP0GCjfxt5Z0yAKxU--XYG5w1-E1GTnqk')
+CREATOR_ID = "@aadi.io"
+BOT_NAME = "Aadi"
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
-class AayuAdvancedEncoder:
+class AadiAdvancedEncoder:
     def __init__(self):
         self.salt_length = 64
         self.iterations = 200000
@@ -183,7 +183,7 @@ class AayuAdvancedEncoder:
                     body_lines.append(f'    {list_name}.sort()')
                     body_lines.append(f'    {list_name}.reverse()')
             
-            body_lines.append(f'    return {random.choice(["None", "True", "False", str(random.randint(1, 1000))])}')
+            body_lines.append(f'    return {random.choice(["True", "False", "None", str(random.randint(1, 1000))])}')
             
             func_code = f'''def {func_name}({", ".join(params)}):
 {chr(10).join(body_lines)}'''
@@ -322,7 +322,8 @@ class AayuAdvancedEncoder:
             # Step 2: Advanced string obfuscation
             try:
                 code = self.advanced_string_obfuscation(code)
-            except:
+            except Exception as e:
+                print(f"String obfuscation failed, continuing without. Error: {e}")
                 pass
             
             # Step 3: Advanced import scrambling
@@ -344,11 +345,11 @@ class AayuAdvancedEncoder:
 import base64, secrets, hashlib, zlib, gzip, bz2, lzma, codecs, random, string
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbk2f2 import PBKDF2HMAC
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
-class __AAYU_DECODER__:
+class __AADI_DECODER__:
     def __init__(self):
         self.__salt_hex = "{salt_hex}"
         self.__encrypted_data = "{encrypted_data}"
@@ -462,7 +463,7 @@ class __AAYU_DECODER__:
 
 # Initialize and run the decoder
 if __name__ == "__main__":
-    __decoder = __AAYU_DECODER__()
+    __decoder = __AADI_DECODER__()
     __decoder.__execute_protected_code()
 '''
             
@@ -482,12 +483,12 @@ if __name__ == "__main__":
             raise Exception(f"🚫 MEGA PROTECTION FAILED: {str(e)}")
 
 # Initialize the Advanced Encoder
-encoder = AayuAdvancedEncoder()
+encoder = AadiAdvancedEncoder()
 
 @bot.message_handler(commands=['start'])
 def start_command(message):
     welcome_msg = f"""
-🔥 **AAYU ENCODER BOT** 🔥
+🔥 **{BOT_NAME} BOT** 🔥
 **Created by:** {CREATOR_ID}
 
 This bot provides **ultimate protection** for your Python files. It uses a series of advanced techniques, including multi-layer encryption, code obfuscation, and dummy code injection, to make your code nearly impossible to decompile or reverse-engineer.
@@ -500,7 +501,7 @@ Simply send me the **.py** file you want to protect!
 def handle_file(message):
     try:
         if not message.document.file_name.endswith('.py'):
-            bot.reply_to(message, f"❌ **AAYU ENCODER ERROR**\n\nOnly Python (.py) files accepted!\n\n📧 Support: {CREATOR_ID}", parse_mode='Markdown')
+            bot.reply_to(message, f"❌ **{BOT_NAME} ERROR**\n\nOnly Python (.py) files accepted!\n\n📧 Support: {CREATOR_ID}", parse_mode='Markdown')
             return
         
         if message.document.file_size > 15 * 1024 * 1024:
@@ -521,7 +522,7 @@ def handle_file(message):
         except UnicodeDecodeError:
             try:
                 original_code = downloaded_file.decode('latin-1')
-            except:
+            except Exception as e:
                 bot.reply_to(message, f"❌ **ENCODING ERROR**\n\nCannot decode file. Ensure it's a valid Python file.\n\n📧 Support: {CREATOR_ID}", parse_mode='Markdown')
                 return
         
@@ -531,7 +532,7 @@ def handle_file(message):
             bot.reply_to(message, f"❌ **PROTECTION FAILED**\n\n```\n{str(e)}\n```\n\n📧 Contact: {CREATOR_ID}", parse_mode='Markdown')
             return
         
-        protected_filename = f"AAYU_PROTECTED_{message.document.file_name}"
+        protected_filename = f"Aadi_PROTECTED_{message.document.file_name}"
         
         with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.py', encoding='utf-8') as temp_file:
             temp_file.write(protected_code)
@@ -594,7 +595,7 @@ def handle_text_code(message):
             )
             return
         
-        protected_filename = f"AAYU_PROTECTED_CODE_{message.from_user.id}_{random.randint(1000,9999)}.py"
+        protected_filename = f"Aadi_PROTECTED_CODE_{message.from_user.id}_{random.randint(1000,9999)}.py"
         
         with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.py', encoding='utf-8') as temp_file:
             temp_file.write(protected_code)
@@ -622,8 +623,8 @@ Creator: {CREATOR_ID}
 
 # Main execution
 if __name__ == "__main__":
-    if BOT_TOKEN == 'YOUR_BOT_TOKEN_HERE':
-        exit(1)
+    if BOT_TOKEN == '8241335689:AAFP0GCjfxt5Z0yAKxU--XYG5w1-E1GTnqk':
+        print("Bot token is set.")
     
     if os.getenv('RENDER') or os.getenv('PORT'):
         try:
@@ -657,10 +658,12 @@ if __name__ == "__main__":
             app.run(host='0.0.0.0', port=port, debug=False)
             
         except ImportError:
+            print("Please install Flask to use webhook mode: pip install Flask")
             exit(1)
             
     else:
         try:
             bot.infinity_polling(none_stop=True, interval=1, timeout=60)
         except Exception as e:
+            print(f"Polling failed: {e}")
             exit(1)
