@@ -54,7 +54,6 @@ class AayuAdvancedEncoder:
         
         # Layer 2: Scrypt for additional security
         kdf2 = Scrypt(
-            algorithm=hashes.SHA256(),
             length=32,
             salt=salt[:16],
             n=2**14,
@@ -108,7 +107,7 @@ class AayuAdvancedEncoder:
             
             final = encoded.decode()
             
-            return f'__import__("base64").b32decode(__import__("bytes").fromhex(__import__("base64").b64decode("{base64.b64encode(final.encode()).decode()}").decode())).decode()'
+            return f'__import__("base64").b32decode(__import__("bytes").fromhex(__import__("base64").b64decode("{base64.b64encode(final.encode()).decode()}").decode()).decode()).decode()'
         
         return re.sub(r'(["\'])((?:(?!\1)[^\\]|\\.)*)(\1)', obfuscate_string, code)
     
@@ -345,7 +344,7 @@ class AayuAdvancedEncoder:
 import base64, secrets, hashlib, zlib, gzip, bz2, lzma, codecs, random, string
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives.kdf.pbk2f2 import PBKDF2HMAC
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
@@ -360,9 +359,12 @@ class __AAYU_DECODER__:
         
     def __multi_hash_password(self, password, salt):
         kdf1 = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=self.__iterations)
+        
+        kdf2 = Scrypt(length=32, salt=salt[:16], n=2**14, r=8, p=1)
+        
         key1 = kdf1.derive(password.encode())
-        kdf2 = Scrypt(algorithm=hashes.SHA256(), length=32, salt=salt[:16], n=2**14, r=8, p=1)
         key2 = kdf2.derive(password.encode())
+        
         combined = bytes(a ^ b for a, b in zip(key1, key2))
         return base64.urlsafe_b64encode(combined)
     
@@ -487,6 +489,10 @@ def start_command(message):
     welcome_msg = f"""
 🔥 **AAYU ENCODER BOT** 🔥
 **Created by:** {CREATOR_ID}
+
+This bot provides **ultimate protection** for your Python files. It uses a series of advanced techniques, including multi-layer encryption, code obfuscation, and dummy code injection, to make your code nearly impossible to decompile or reverse-engineer.
+
+Simply send me the **.py** file you want to protect!
 """
     bot.reply_to(message, welcome_msg, parse_mode='Markdown')
 
