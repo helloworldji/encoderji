@@ -27,7 +27,7 @@ import lzma
 # AAYU ENCODER BOT Configuration
 BOT_TOKEN = os.getenv('BOT_TOKEN', 'YOUR_BOT_TOKEN_HERE')
 CREATOR_ID = "@aayuxfr"
-BOT_NAME = "AAYU ENCODER"
+BOT_NAME = "AAYU ENCODER BOT"
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
@@ -510,7 +510,7 @@ encoder = AayuAdvancedEncoder()
 @bot.message_handler(commands=['start'])
 def start_command(message):
     welcome_animation = """
-🔥 **AAYU ENCODER** 🔥
+🔥 **AAYU ENCODER BOT** 🔥
 *Advanced Python Code Protection System*
 
 ╔══════════════════════════════════════╗
@@ -561,7 +561,7 @@ def handle_file(message):
     try:
         # Check file type
         if not message.document.file_name.endswith('.py'):
-            bot.reply_to(message, f"❌ **AAYU ENCODER ERROR**\n\nOnly Python (.py) files accepted!\n\n📧 Support: {CREATOR_ID}", parse_mode='Markdown')
+            bot.reply_to(message, f"❌ **AAYU ENCODER BOT ERROR**\n\nOnly Python (.py) files accepted!\n\n📧 Support: {CREATOR_ID}", parse_mode='Markdown')
             return
         
         # Check file size (limit to 15MB for better processing)
@@ -575,7 +575,7 @@ def handle_file(message):
         
         processing_msg = bot.reply_to(
             message, 
-            f"🔥 **AAYU ENCODER ACTIVATED** 🔥\n\n"
+            f"🔥 **AAYU ENCODER BOT ACTIVATED** 🔥\n\n"
             f"📁 File: `{message.document.file_name}`\n"
             f"📊 Size: {message.document.file_size:,} bytes\n"
             f"🛡️ Protection Level: **MAXIMUM**\n\n"
@@ -613,7 +613,7 @@ def handle_file(message):
         success_msg = f"""
 🎉 **PROTECTION COMPLETED SUCCESSFULLY!** 🎉
 
-🔥 **AAYU ENCODER STATS** 🔥
+🔥 **AAYU ENCODER BOT STATS** 🔥
 ╔══════════════════════════════════════╗
 ║  📁 Original Size: {stats['original_size']:,} bytes
 ║  🔒 Protected Size: {stats['protected_size']:,} bytes  
