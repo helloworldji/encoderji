@@ -134,7 +134,7 @@ class AayuAdvancedEncoder:
                         f'"{self.generate_random_string(20)}"',
                         str(random.randint(1000, 999999)),
                         f'[{", ".join(str(random.randint(1, 100)) for _ in range(random.randint(3, 8)))}]',
-                        f'{{{", ".join(f"\\"{self.generate_random_string(5)}\\": {random.randint(1, 1000)}" for _ in range(random.randint(2, 5)))}}}',
+                        f'{{{", ".join(f"\'{self.generate_random_string(5)}\': {random.randint(1, 1000)}" for _ in range(random.randint(2, 5)))}}}',
                     ])
                     method_body.append(f'        {var} = {val}')
                 
@@ -203,7 +203,7 @@ class AayuAdvancedEncoder:
                 items = [f'"{self.generate_random_string(10)}"' for _ in range(random.randint(10, 30))]
                 dummy_variables.append(f'{var_name} = [{", ".join(items)}]')
             elif var_type == 'dict':
-                items = [f'"{self.generate_random_string(8)}": {random.randint(1, 1000)}' for _ in range(random.randint(5, 15))]
+                items = [f"'{self.generate_random_string(8)}': {random.randint(1, 1000)}" for _ in range(random.randint(5, 15))]
                 dummy_variables.append(f'{var_name} = {{{", ".join(items)}}}')
         
         # Combine all dummy code
@@ -317,34 +317,27 @@ class AayuAdvancedEncoder:
             # Generate ultra-secure password
             password = hashlib.sha512(f"{user_id}_{secrets.token_hex(32)}_{random.randint(100000, 999999)}".encode()).hexdigest()[:32]
             
-            print("🔄 Step 1/7: Injecting dummy code...")
             # Step 1: Inject massive dummy code
             code = self.inject_mega_dummy_code(original_code)
             
-            print("🔄 Step 2/7: Advanced string obfuscation...")
             # Step 2: Advanced string obfuscation
             try:
                 code = self.advanced_string_obfuscation(code)
             except:
-                pass  # Continue if syntax errors
+                pass
             
-            print("🔄 Step 3/7: Import scrambling...")
             # Step 3: Advanced import scrambling
             code = self.advanced_import_scrambling(code)
             
-            print("🔄 Step 4/7: Chaos scrambling...")
             # Step 4: Chaos scrambling
             code = self.chaos_scramble(code, rounds=3)
             
-            print("🔄 Step 5/7: Multi-compression...")
             # Step 5: Multi-layer compression
             compressed_data, compression_method, compression_ratio = self.multi_compression(code)
             
-            print("🔄 Step 6/7: Quantum encryption...")
             # Step 6: Quantum encryption
             encrypted_data, salt_hex, xor_key_length = self.quantum_encrypt(compressed_data, password)
             
-            print("🔄 Step 7/7: Building protection wrapper...")
             # Step 7: Create ultimate protection wrapper
             protection_layers = f'''
 # Protected by {BOT_NAME}
